@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title || 'Open Surplus in App' %></title>
+
+  <meta property="og:title" content="<%= title || 'Open Surplus in App' %>">
+  <meta property="og:description" content="<%= description || 'Tap to view this content in the app.' %>">
+  <meta property="og:image" content="<%= image_url || 'https://surplus.id/wp-content/uploads/2025/01/newlogosurplus2025.png' %>">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0; padding:0; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif;">
+  <p>Opening Surplus app...</p>
+  <script>
+    const ua = navigator.userAgent;
+
+    window.location =  "<%= redirect_url %>";
+    setTimeout(() => {
+      window.location =  "<%= fallback_url %>";
+    }, 2000);
+   
+  </script>
+</body>
+</html>

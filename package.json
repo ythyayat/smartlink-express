@@ -1,13 +1,16 @@
 {
   "name": "smartlink-express",
   "version": "1.0.0",
-  "description": "",
+  "description": "this is a dynamic link for deeplinks",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docker:build": "docker build -t smartlink:latest .",
+    "docker:start": "docker run -d --name smartlink-container --restart unless-stopped --read-only --tmpfs /tmp --env-file .env -p 3000:3000 smartlink:latest"
   },
   "keywords": [],
-  "author": "",
+  "author": "ythyayat",
+  "repository": "https://github.com/ythyayat/smartlink-express",
   "license": "ISC",
   "type": "module",
   "dependencies": {
@@ -16,9 +19,11 @@
     "dotenv": "^17.2.1",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.0.1",
     "lowdb": "^7.0.1",
     "mysql2": "^3.14.3",
     "nanoid": "^5.1.5",
+    "redis": "^5.8.1",
     "sequelize": "^6.37.7"
   }
 }

@@ -6,6 +6,8 @@
   <title>Link Not Found</title>
   <meta name="description" content="The link you are looking for does not exist.">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+    
     body {
       margin: 0;
       padding: 0;
@@ -13,8 +15,8 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      font-family: sans-serif;
-      background-color: #f8f9fa;
+      font-family:  "Nunito", sans-serif;
+      background-color: #FFFFFF;
     }
     .container {
       text-align: center;
@@ -22,8 +24,8 @@
       padding: 20px;
     }
     h1 {
-      font-size: 2rem;
-      color: #333;
+      font-size: 4rem;
+      color: #42BCA4;
     }
     p {
       color: #666;
@@ -32,14 +34,14 @@
     a {
       display: inline-block;
       padding: 10px 16px;
-      background-color: #007bff;
+      background-color: #42BCA4;
       color: white;
       text-decoration: none;
       border-radius: 6px;
       font-size: 0.9rem;
     }
     a:hover {
-      background-color: #0056b3;
+      background-color: #94D8CA;
     }
   </style>
 </head>
@@ -47,7 +49,7 @@
   <div class="container">
     <h1>404</h1>
     <p>The link you are looking for could not be found.</p>
-    <a href="https://surplus.id">Go Home</a>
+    <a href="<%= redirect_url %>">Go Home</a>
   </div>
 </body>
 </html>

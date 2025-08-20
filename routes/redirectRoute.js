@@ -13,9 +13,9 @@ router.get('/:slug', redirectLinkLimiter, async (req, res) => {
       return;
     }
 
-    const shouldSave = await trackClick(link, req);
     const { redirectUrl, fallbackUrl } = determineRedirectUrls(link, req);
-    await saveLinkIfNecessary(link, shouldSave);
+    
+    trackClick(link, req).catch(err => console.error('Track click error:', err));
     
     res.render('link', {
       title: link.title,
@@ -31,7 +31,17 @@ router.get('/:slug', redirectLinkLimiter, async (req, res) => {
 });
 
 async function findLinkBySlug(slug) {
-  return Link.findOne({ where: { slug } });
+  const cacheKey = `smartlink-express:link:${slug}`;
+  const cachedLink = await redisClient.get(cacheKey);
+  if (cachedLink) {
+    const plainLink = JSON.parse(cachedLink);
+    return Link.build(plainLink, { isNewRecord: false });
+  }
+  const link = await Link.findOne({ where: { slug } });
+  if (link) {
+    await redisClient.setex(cacheKey, 3600, JSON.stringify(link.get({ plain: true })));
+  }
+  return link;
 }
 
 function handleNotFound(res) {
@@ -42,57 +52,57 @@ function handleNotFound(res) {
 
 async function trackClick(link, req) {
   const cacheKey = generateCacheKey(req, link.slug);
-  let shouldSave = false;
-
+  
   try {
-    const isNew = await redisClient.set(cacheKey, '1', { EX: 60, NX: true });
-    if (isNew) {
-      updateClickCount(link, req.headers['user-agent'] || '');
-      shouldSave = true;
+    if (redisClient.isReady) {
+      const isNew = await redisClient.set(cacheKey, '1', { EX: 60, NX: true });
+      if (isNew) {
+        await updateClickCount(link.slug, req.headers['user-agent'] || '');
+      }
+    } else {
+      throw new Error('Redis client not ready');
     }
   } catch (err) {
-    console.error('Redis error - falling back to in-memory:', err);
-    shouldSave = handleInMemoryTracking(link, req, cacheKey);
+    console.error('Redis tracking error:', err);
+    handleInMemoryTracking(link, req, cacheKey);
   }
-  return shouldSave;
 }
 
 function generateCacheKey(req, slug) {
   return `smartlink-express:click:${req.ip}:${req.headers['user-agent'] || 'unknown'}:${slug}`;
 }
 
-function updateClickCount(link, ua) {
-  link.click_count += 1;
+async function updateClickCount(slug, ua) {
+  const updateFields = {
+    click_count: 1,
+    updated_at: new Date().toISOString()
+  };
+  
   if (/android/i.test(ua)) {
-    link.click_count_android += 1;
+    updateFields.click_count_android = 1;
   } else if (/iphone|ipad|ipod/i.test(ua)) {
-    link.click_count_ios += 1;
+    updateFields.click_count_ios = 1;
   } else {
-    link.click_count_other += 1;
+    updateFields.click_count_other = 1;
   }
+
+  await Link.increment(updateFields, {
+    where: { slug }
+  });
+  
+  const cacheKey = `smartlink-express:link:${slug}`;
+  await redisClient.expire(cacheKey, 3600).catch(() => {});
 }
 
 function handleInMemoryTracking(link, req, cacheKey) {
   const now = Date.now();
   const oneMinute = 60 * 1000;
+  
   if (!global.clickCache) global.clickCache = new Map();
-
+  
   if (!global.clickCache.has(cacheKey) || now - global.clickCache.get(cacheKey) > oneMinute) {
-    link.click_count += 1;
-    updateClickCountByPlatform(link, req.headers['user-agent'] || '');
+    updateClickCount(link.slug, req.headers['user-agent'] || '');
     global.clickCache.set(cacheKey, now);
-    return true;
-  }
-  return false;
-}
-
-function updateClickCountByPlatform(link, ua) {
-  if (/android/i.test(ua)) {
-    link.click_count_android += 1;
-  } else if (/iphone|ipad|ipod/i.test(ua)) {
-    link.click_count_ios += 1;
-  } else {
-    link.click_count_other += 1;
   }
 }
 
@@ -112,12 +122,6 @@ function determineRedirectUrls(link, req) {
     fallbackUrl = process.env.REDIRECT_URL_DEFAULT;
   }
   return { redirectUrl, fallbackUrl };
-}
-
-async function saveLinkIfNecessary(link, shouldSave) {
-  if (shouldSave) {
-    await link.save();
-  }
 }
 
 function handleRedirectError(res, error) {

@@ -63,7 +63,7 @@ curl -X POST http://localhost:3000/api/links \
   -H "x-api-key: your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
-    "path": "example.com",
+    "path": "path/to/your/content", 
     "slug": "custom-slug",
     "title": "Example Link",
     "description": "SmartLink to example.com",

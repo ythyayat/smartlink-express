@@ -119,14 +119,25 @@ REDIRECT_URL_DEFAULT=https://example.com
 ## 📁 Project Structure
 
 ```
+├── config/
+│   └── redisClient.js    # Redis client configuration
+├── middleware/
+│   ├── authMiddleware.js # API key authentication
+│   └── rateLimitMiddleware.js # Rate limiting middleware
+├── models/
+│   └── db.js             # MySQL database model
+├── routes/
+│   ├── apiRoutes.js      # API endpoints
+│   ├── homeRoute.js      # Home page route
+│   └── redirectRoute.js  # Redirect logic
 ├── views/
 │   ├── link.ejs          # Link rendering template
 │   └── not-found.ejs     # 404 fallback template
 ├── server.js             # Express server implementation
-├── db.js                 # MySQL model definition
 ├── Dockerfile            # Container configuration
 ├── .env.example          # Configuration template
-└── public/               # Static assets directory
+├── package.json          # Project dependencies
+└── README.md             # Project documentation
 ```
 
 ## 🔗 API Documentation

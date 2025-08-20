@@ -39,7 +39,7 @@ async function findLinkBySlug(slug) {
   }
   const link = await Link.findOne({ where: { slug } });
   if (link) {
-    await redisClient.setex(cacheKey, 3600, JSON.stringify(link.get({ plain: true })));
+    await redisClient.set(cacheKey, JSON.stringify(link.get({ plain: true })), { EX: 3600 });
   }
   return link;
 }

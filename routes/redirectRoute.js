@@ -74,8 +74,7 @@ function generateCacheKey(req, slug) {
 
 async function updateClickCount(slug, ua) {
   const updateFields = {
-    click_count: 1,
-    updated_at: new Date().toISOString()
+    click_count: 1
   };
   
   if (/android/i.test(ua)) {

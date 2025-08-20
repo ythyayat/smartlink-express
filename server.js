@@ -110,7 +110,7 @@ app.get('/:slug', redirectLinkLimiter, async (req, res) => {
 
     const ip = req.ip;
     const userAgent = req.headers['user-agent'] || 'unknown';
-    const cacheKey = `click:${ip}:${userAgent}:${req.params.slug}`;
+    const cacheKey = `smartlink-express:click:${ip}:${userAgent}:${req.params.slug}`;
     let shouldSave = false;
 
     try {

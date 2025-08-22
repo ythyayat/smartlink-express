@@ -7,23 +7,41 @@ const router = express.Router();
 
 router.get('/:slug', redirectLinkLimiter, async (req, res) => {
   try {
-    const link = await findLinkBySlug(req.params.slug);
+    const slug = req.params.slug;
+    
+    if (slug.length < 3 || slug.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(slug)) {
+      res.status(400).render('not-found', {
+        redirect_url: process.env.REDIRECT_URL_DEFAULT,
+        error: 'Invalid slug format. Slugs must be 3-100 characters and contain only letters, numbers, hyphens, and underscores.'
+      });
+      return;
+    }
+    
+    const link = await findLinkBySlug(slug);
     if (!link) {
       handleNotFound(res);
       return;
     }
 
     const { redirectUrl, fallbackUrl } = determineRedirectUrls(link, req);
+    const androidPackageName = process.env.ANDROID_PACKAGE_NAME;
+    const appName = process.env.APP_NAME;
+    const appleAppId = process.env.APPLE_APP_ID;
+    const appScheme = process.env.APP_SCHEME;
     
     trackClick(link, req).catch(err => console.error('Track click error:', err));
-    
+
     res.render('link', {
       title: link.title,
       description: link.description,
       image_url: link.image_url,
       redirect_url: redirectUrl,
       fallback_url: fallbackUrl,
-      slug: link.slug
+      slug: link.slug,
+      app_name: appName,
+      apple_app_id: appleAppId,
+      android_package_name: androidPackageName,
+      app_scheme: appScheme
     });
   } catch (error) {
     handleRedirectError(res, error);
@@ -110,10 +128,10 @@ function determineRedirectUrls(link, req) {
   let redirectUrl = '';
   let fallbackUrl = '';
 
-  if (/android/.test(ua)) {
+  if (/android/i.test(ua)) {
     redirectUrl = `surplus://${link.path}`;
     fallbackUrl = process.env.FALLBACK_URL_DEFAULT_ANDROID;
-  } else if (/iphone|ipad|ipod/.test(ua)) {
+  } else if (/iphone|ipad|ipod/i.test(ua)) {
     redirectUrl = `surplus://${link.path}`;
     fallbackUrl = process.env.FALLBACK_URL_DEFAULT_IOS;
   } else {

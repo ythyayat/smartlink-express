@@ -19,6 +19,7 @@ app.use(bodyParser.json());
 app.set('view engine', 'ejs');
 app.set('views', join(__dirname, 'views'));
 app.use(express.static(join(__dirname, 'public')));
+app.set("trust proxy", 1);
 
 app.use(homeRoute);
 app.use(redirectRoute);

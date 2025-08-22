@@ -15,6 +15,12 @@ router.post('/links', apiKeyAuth, createLinkLimiter, async (req, res) => {
     return res.status(400).json({ error: 'path is required' });
   }
 
+  if (slug && (slug.length < 3 || slug.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(slug))) {
+    return res.status(400).json({
+      error: 'Invalid slug format. Must be 3-100 characters and contain only letters, numbers, hyphens, and underscores.'
+    });
+  }
+  
   const finalSlug = slug || nanoid();
 
   try {
@@ -33,6 +39,12 @@ router.post('/links', apiKeyAuth, createLinkLimiter, async (req, res) => {
 // Get analytics for a link
 router.get('/links/:slug/stats', apiKeyAuth, statusLinkLimiter, async (req, res) => {
   try {
+    const slug = req.params.slug;
+    if (slug.length < 3 || slug.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(slug)) {
+      return res.status(400).json({
+        error: 'Invalid slug format. Must be 3-100 characters and contain only letters, numbers, hyphens, and underscores.'
+      });
+    }
     const link = await Link.findOne({ where: { slug: req.params.slug } });
     if (!link) return res.status(404).json({ error: 'Not Found' });
     res.json({

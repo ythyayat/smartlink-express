@@ -3,23 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <title><%= title || 'Open in App' %></title>
-
+  
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; connect-src 'self' https: <%= app_scheme %>:; frame-src 'self' https: <%= app_scheme %>:; child-src 'self' https: <%= app_scheme %>:; media-src 'self' https: data:; img-src 'self' https: data:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:;">
+  
   <meta property="og:title" content="<%= title || 'Open in App' %>">
   <meta property="og:description" content="<%= description || 'Tap to view this content in the app.' %>">
   <meta property="og:image" content="<%= image_url %>">
+  <meta property="og:url" content="<%= redirect_url %>">
+  
   <meta name="twitter:card" content="summary_large_image">
+  
+  <meta name="apple-itunes-app" content="app-id=<%= apple_app_id %>, app-argument=<%= redirect_url %>">
+  
+  <meta name="al:android" content="package=<%= android_package_name %>">
+  <meta name="al:android" content="app_name=<%= app_name %>">
+  <meta name="al:android" content="url=<%= redirect_url %>">
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
 </head>
 <body style="margin:0; padding:0; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif;">
-  <p>Opening app...</p>
+  <div id="loading" style="text-align: center;">
+    <p>Opening app...</p>
+    <div style="margin-top: 10px; font-size: 0.8em; color: #666;">If the app doesn't open automatically, <a id="fallbackLink" href="#">tap here</a></div>
+  </div>
+  
   <script>
-    const ua = navigator.userAgent;
-
-    window.location =  "<%= redirect_url %>";
-    setTimeout(() => {
-      window.location =  "<%= fallback_url %>";
-    }, 2000);
-   
+    document.addEventListener('DOMContentLoaded', function() {
+      const ua = navigator.userAgent;
+      const isChrome = /Chrome/i.test(ua) && /Android/i.test(ua);
+      const redirectUrl = "<%= redirect_url %>";
+      const fallbackUrl = "<%= fallback_url %>";
+      
+      const fallbackLink = document.getElementById('fallbackLink');
+      fallbackLink.href = fallbackUrl;
+      
+      if (isChrome) {
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = redirectUrl;
+        document.body.appendChild(iframe);
+        
+        window.location = redirectUrl;
+        
+        setTimeout(() => {
+          window.location = fallbackUrl;
+        }, 2000);
+      } else {
+        window.location = redirectUrl;
+        
+        setTimeout(() => {
+          window.location = fallbackUrl;
+        }, 2000);
+      }
+    });
   </script>
 </body>
 </html>

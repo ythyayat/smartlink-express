@@ -109,11 +109,15 @@ DB_PORT=3306
 DB_NAME=smartlink
 DB_USER=root
 DB_PASS=yourpassword
+APP_SCHEME=yourapp
 REDIS_URL=redis://localhost:6379
 API_KEY=your-secret-api-key
 FALLBACK_URL_DEFAULT_IOS=https://apps.apple.com/app/id123456789
 FALLBACK_URL_DEFAULT_ANDROID=https://play.google.com/store/apps/details?id=com.example.app
 REDIRECT_URL_DEFAULT=https://example.com
+APPLE_APP_ID=id123456789
+ANDROID_PACKAGE_NAME=com.example.yourapp
+APP_NAME=your-app-name
 ```
 
 ## 📁 Project Structure

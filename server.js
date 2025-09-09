@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import homeRoute from './routes/homeRoute.js';
 import redirectRoute from './routes/redirectRoute.js';
 import apiRoutes from './routes/apiRoutes.js';
+import appleAppSiteAssociation from './routes/appleAppSiteAssociation.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -23,6 +24,7 @@ app.set("trust proxy", 1);
 
 app.use(homeRoute);
 app.use(redirectRoute);
+app.use(appleAppSiteAssociation)
 app.use("/api", apiRoutes);
 
 app.get('/health', (req, res) => {
